@@ -222,12 +222,12 @@ def perform_spa_analysis(I, Q, U, V, target_fp3):
 
     return {
         "profile": profile,
-        "L": L,
+        "L": L * 2,
         "phi": phi,
-        "A_abs": A_abs,
-        "B_abs": B_abs,
-        "m1": m1,
-        "m2": m2,
+        "A_abs": A_abs * 2,
+        "B_abs": B_abs * 2,
+        "m1": m1 * 2,
+        "m2": m2 * 2,
     }
 
 
@@ -334,11 +334,7 @@ class SimState:
 
         v2 = np.random.normal(0, self.noise, (self.nsubs, self.nbins))
 
-        q2 /= 5
-        u2 /= 5
-        v2 /= 5
-
-        i2 = np.sqrt(q2**2 + u2**2 + v2**2) * 5
+        i2 = np.sqrt(q2**2 + u2**2 + v2**2)
 
         # --- Incoherent Sum ---
         q_sum = q1 + q2
@@ -528,7 +524,7 @@ def init_plots():
         max(xlim_left, xlim_right), state.nbins
     )
     ax_amp.set_xlim(xlim_left, xlim_right)
-    ax_amp.set_ylim(0, 1.2)
+    # ax_amp.set_ylim(0, 1.2)
     ax_amp.legend(
         ncol=6,
         fontsize=9,
@@ -1025,8 +1021,8 @@ def update_fp3(val):
     lines["m2"].set_ydata(np.abs(res["m2"]))
 
     # Scale amplitude plot (keep x-limits unchanged)
-    mx = max(np.max(res["A_abs"]), np.max(np.abs(res["m1"])))
-    ax_amp.set_ylim(0, mx * 1.2 if mx > 0 else 1.0)
+    # mx = max(np.max(res["A_abs"]), np.max(np.abs(res["m1"])))
+    # ax_amp.set_ylim(0, mx * 1.2 if mx > 0 else 1.0)
 
     # Update phase scatter points
     x_vals = np.arange(state.nbins)
@@ -1254,8 +1250,8 @@ def update(val):
     lines["m2"].set_ydata(np.abs(res["m2"]))
 
     # Scale Amp plot
-    mx = max(np.max(res["A_abs"]), np.max(np.abs(res["m1"])))
-    ax_amp.set_ylim(0, mx * 1.2 if mx > 0 else 1.0)
+    # mx = max(np.max(res["A_abs"]), np.max(np.abs(res["m1"])))
+    # ax_amp.set_ylim(0, mx * 1.2 if mx > 0 else 1.0)
 
     # Phases
     x_vals = np.arange(state.nbins)
