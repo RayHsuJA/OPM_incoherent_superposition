@@ -187,6 +187,8 @@ def perform_spa_analysis(I, Q, U, V, target_fp3):
 
     # 1. Pulse Profile
     profile = np.mean(I, axis=0)
+    # New: linear polarization intensity (per longitude), averaged over pulses
+    Llin = np.sqrt(Q.mean(axis=0) ** 2 + U.mean(axis=0) ** 2)
 
     # 2. Compute LRFS
     # Stokes I
@@ -228,6 +230,8 @@ def perform_spa_analysis(I, Q, U, V, target_fp3):
         "B_abs": B_abs * 2,
         "m1": m1 * 2,
         "m2": m2 * 2,
+        # New: expose linear polarization intensity
+        "Llin": Llin,
     }
 
 
@@ -497,15 +501,11 @@ def init_plots():
     res = state.analysis
 
     # Amplitudes
-    # Normalize profile for comparison
-    prof_norm = (
-        res["profile"] / np.max(res["profile"])
-        if np.max(res["profile"]) > 0
-        else res["profile"]
-    )
-
     (lines["prof"],) = ax_amp.plot(
         x, res["profile"], "k-", lw=1, alpha=0.3, label="Pulse Profile"
+    )
+    (lines["Llin"],) = ax_amp.plot(
+        x, res["Llin"], color="C4", linestyle="-.", lw=1.5, label="$L_{\\rm lin}$"
     )
     (lines["L"],) = ax_amp.plot(x, np.abs(res["L"]), "k:", lw=1.5, label="$|m_I|$")
     (lines["A"],) = ax_amp.plot(x, res["A_abs"], "C1--", lw=1.5, label="$|A|$")
@@ -526,7 +526,7 @@ def init_plots():
     ax_amp.set_xlim(xlim_left, xlim_right)
     ax_amp.set_ylim(0, np.max(res["profile"]) * 1.1)
     ax_amp.legend(
-        ncol=6,
+        ncol=7,  # increased to accommodate the new trace
         fontsize=9,
         loc="lower center",
         bbox_to_anchor=(0.5, 1.01),
@@ -1015,6 +1015,8 @@ def update_fp3(val):
     lines["B"].set_ydata(res["B_abs"])
     lines["m1"].set_ydata(np.abs(res["m1"]))
     lines["m2"].set_ydata(np.abs(res["m2"]))
+    # New: update linear polarization intensity
+    lines["Llin"].set_ydata(res["Llin"])
 
     # Scale amplitude plot (keep x-limits unchanged)
     ax_amp.set_ylim(
@@ -1235,13 +1237,15 @@ def update(val):
     # Look vertically down the Z axis
     ax_3d.view_init(elev=90, azim=-90)  # type: ignore
 
-    # Norm Profile
+    # Profile
     lines["prof"].set_ydata(res["profile"])
     lines["L"].set_ydata(np.abs(res["L"]))
     lines["A"].set_ydata(res["A_abs"])
     lines["B"].set_ydata(res["B_abs"])
     lines["m1"].set_ydata(np.abs(res["m1"]))
     lines["m2"].set_ydata(np.abs(res["m2"]))
+    # New: update linear polarization intensity
+    lines["Llin"].set_ydata(res["Llin"])
 
     # Scale Amp plot
     ax_amp.set_ylim(
