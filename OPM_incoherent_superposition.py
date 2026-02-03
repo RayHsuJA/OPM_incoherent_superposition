@@ -505,7 +505,7 @@ def init_plots():
     )
 
     (lines["prof"],) = ax_amp.plot(
-        x, prof_norm, "k-", lw=1, alpha=0.3, label="Pulse Profile"
+        x, res["profile"], "k-", lw=1, alpha=0.3, label="Pulse Profile"
     )
     (lines["L"],) = ax_amp.plot(x, np.abs(res["L"]), "k:", lw=1.5, label="$|m_I|$")
     (lines["A"],) = ax_amp.plot(x, res["A_abs"], "C1--", lw=1.5, label="$|A|$")
@@ -524,7 +524,7 @@ def init_plots():
         max(xlim_left, xlim_right), state.nbins
     )
     ax_amp.set_xlim(xlim_left, xlim_right)
-    # ax_amp.set_ylim(0, 1.2)
+    ax_amp.set_ylim(0, np.max(res["profile"]) * 1.1)
     ax_amp.legend(
         ncol=6,
         fontsize=9,
@@ -1007,13 +1007,9 @@ def update_fp3(val):
     V = state.res_sum["V"]
 
     res = perform_spa_analysis(I, Q, U, V, target_fp3)
-    # 覆寫 state.analysis 以避免後續 update() 回退到舊頻率
     state.analysis = res
-    # ...existing code updating lines...
-    prof_max = np.max(res["profile"])
-    prof = res["profile"] / prof_max if prof_max > 0 else res["profile"]
 
-    lines["prof"].set_ydata(prof)
+    lines["prof"].set_ydata(res["profile"])
     lines["L"].set_ydata(np.abs(res["L"]))
     lines["A"].set_ydata(res["A_abs"])
     lines["B"].set_ydata(res["B_abs"])
@@ -1021,8 +1017,9 @@ def update_fp3(val):
     lines["m2"].set_ydata(np.abs(res["m2"]))
 
     # Scale amplitude plot (keep x-limits unchanged)
-    # mx = max(np.max(res["A_abs"]), np.max(np.abs(res["m1"])))
-    # ax_amp.set_ylim(0, mx * 1.2 if mx > 0 else 1.0)
+    ax_amp.set_ylim(
+        0, np.max(res["profile"]) * 1.1 if np.max(res["profile"]) > 0 else 1.0
+    )
 
     # Update phase scatter points
     x_vals = np.arange(state.nbins)
@@ -1239,10 +1236,7 @@ def update(val):
     ax_3d.view_init(elev=90, azim=-90)  # type: ignore
 
     # Norm Profile
-    prof_max = np.max(res["profile"])
-    prof = res["profile"] / prof_max if prof_max > 0 else res["profile"]
-
-    lines["prof"].set_ydata(prof)
+    lines["prof"].set_ydata(res["profile"])
     lines["L"].set_ydata(np.abs(res["L"]))
     lines["A"].set_ydata(res["A_abs"])
     lines["B"].set_ydata(res["B_abs"])
@@ -1250,8 +1244,9 @@ def update(val):
     lines["m2"].set_ydata(np.abs(res["m2"]))
 
     # Scale Amp plot
-    # mx = max(np.max(res["A_abs"]), np.max(np.abs(res["m1"])))
-    # ax_amp.set_ylim(0, mx * 1.2 if mx > 0 else 1.0)
+    ax_amp.set_ylim(
+        0, np.max(res["profile"]) * 1.1 if np.max(res["profile"]) > 0 else 1.0
+    )
 
     # Phases
     x_vals = np.arange(state.nbins)
